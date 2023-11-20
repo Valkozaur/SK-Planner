@@ -6,10 +6,6 @@
       "steps": [],
       "parameters": [
         {
-          "Key": "input",
-          "Value": "2130.23"
-        },
-        {
           "Key": "number2",
           "Value": "1.23"
         }
@@ -48,7 +44,8 @@
       "RequestSettings": null
     }
   ],
-  "parameters": [],
+  "parameters": [
+  ],
   "outputs": [
     "RESULT__FINAL_AMOUNT"
   ],

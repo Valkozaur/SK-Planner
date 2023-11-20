@@ -2,9 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI;
-using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Planners;
-using System.Text.Json;
 
 namespace SK_Planner
 {
@@ -23,8 +21,11 @@ namespace SK_Planner
             var embeddingModel = configuration["EmbeddingModel"]!;
 
             IKernel kernel = new KernelBuilder()
-                //.WithLoggerFactory(sp.GetRequiredService<ILoggerFactory>())
-                //.WithMemory(sp.GetRequiredService<ISemanticTextMemory>())
+                .WithLoggerFactory(LoggerFactory.Create(b =>
+                {
+                    b.AddConsole();
+                    b.SetMinimumLevel(LogLevel.Trace);
+                }))
                 .WithAzureOpenAIChatCompletionService(deploymentName: completionModel, endpoint: endpoint, apiKey: key)
                 .WithAzureOpenAITextEmbeddingGenerationService(deploymentName: embeddingModel, endpoint: endpoint, apiKey: key)
                 .Build();
@@ -35,16 +36,11 @@ namespace SK_Planner
             var planner = new SequentialPlanner(kernel);
 
             var ask = "If my investment of 2130.23 dollars increased by 23%, how much would I have after I spent $5 on a latte?";
-            //var plan = await planner.CreatePlanAsync(ask);
 
-            //Console.WriteLine("Plan:\n");
-            //Console.WriteLine(JsonSerializer.Serialize(plan, new JsonSerializerOptions { WriteIndented = true }));
-
-            var planJson = await File.ReadAllTextAsync("Plan.json");
-            var planFromJson = kernel.ImportPlanFromJson(planJson);
+            var plan = await planner.CreatePlanAsync(ask);
 
             // Execute the plan
-            var result = await kernel.RunAsync(planFromJson);
+            var result = await kernel.RunAsync(plan);
 
             Console.WriteLine("Plan results:");
             Console.WriteLine(result.GetValue<string>()!.Trim());
